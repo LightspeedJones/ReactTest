@@ -1,8 +1,9 @@
 import * as React from 'react';
-import {useState} from 'react';
-import {Button, Pressable, StyleSheet, TextInput} from 'react-native';
+import {useState, useEffect} from 'react';
+import {Button, StyleSheet, TextInput} from 'react-native';
 import {Text, View} from '../components/Themed';
 import {ScrollView} from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type Task = {
   title: string
@@ -17,13 +18,15 @@ export default function TodoListScreen() {
   );
 }
 
-function Task(props: { task: Task, index: number, onCompleted: (index: number) => void }) {
+function Task(props: { task: Task, index: number, onCompleted: (index: number) => void, onDeleted: (index: number) => void }) {
   return (
     <View style={styles.row}>
-      <View style={styles.btnDone}>
+      <Text>💡</Text>
+      <Text numberOfLines={1} style={[{textDecorationLine: props.task.completed ? "line-through" : "none",}, styles.text]}>{props.task.title}</Text>
+      <View style={styles.btnDoneRemove}>
         <Button onPress={() => (props.onCompleted(props.index))} title={props.task.completed ? "Undone" : "Done"}/>
+        <Button onPress={() => (props.onDeleted(props.index))} title="Remove"/>
       </View>
-      <Text style={[{textDecorationLine: props.task.completed ? "line-through" : "none",}, styles.text]}>{props.task.title}</Text>💡
     </View>
   );
 }
@@ -31,35 +34,49 @@ function Task(props: { task: Task, index: number, onCompleted: (index: number) =
 function Todo() {
   const [tasks, setTasks] = useState([
     {
-      title: "Grab some Pizza",
-      completed: true
-    },
-    {
-      title: "Do your workout",
-      completed: true
-    },
-    {
-      title: "Hangout with friends",
+      title: "",
       completed: false
     }
-  ]);
+  ])
 
-  const addTask = (title: string) => {
+  useEffect(() => {getTasks()}, [])
+
+  const getTasks = async () => {
+    const json = await AsyncStorage.getItem('tasks');
+    let jsonObj = json != null ? JSON.parse(json) : null;
+    setTasks(jsonObj)
+  }
+
+  const addTask = async (title: string) => {
     const newTasks = [...tasks, {title, completed: false}];
-    setTasks(newTasks);
+    saveTaskJson(newTasks);
   };
 
-  const completeTask = (index: number) => {
+  const completeTask = async  (index: number) => {
     const newTasks = [...tasks];
     newTasks[index].completed = !newTasks[index].completed;
-    setTasks(newTasks);
+    saveTaskJson(newTasks);
   };
 
+  const removeTask = async (index: number) => {
+    const taskList = [...tasks];
+    taskList.splice(index, 1);
+    saveTaskJson(taskList);
+  }
+
+  //seta o json para salvar as tarefas com asyncstorage
+  const saveTaskJson = async (json: {title: string, completed: boolean}[]) => {
+    setTasks(json)
+    const jsonString = JSON.stringify(json)
+    await AsyncStorage.setItem('tasks', jsonString)
+  }
+
   return (
-    <View style={styles.treco}>
+    <View style={styles.listContainer}>
       <ScrollView style={styles.list}>
         {tasks.map((task, index) => (
           <Task
+            onDeleted={removeTask}
             onCompleted={completeTask}
             task={task}
             index={index}
@@ -125,18 +142,17 @@ const styles = StyleSheet.create({
   text: {
     padding: 5
   },
-  treco: {
+  listContainer: {
     width: '90%'
   },
   btnAdd:{
-    // width: '50%',
-    // alignItems: 'center',
     justifyContent: 'center',
     alignContent: 'center',
   },
-  btnDone: {
-    width: 100,
-    // justifyContent: 'center',
-    alignContent: 'center',
+  btnDoneRemove: {
+    flexDirection: 'row',
+    columnGap: 10,
+    alignItems: 'flex-end',
+    marginLeft: 'auto'
   }
 });
