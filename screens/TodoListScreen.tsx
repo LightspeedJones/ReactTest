@@ -4,6 +4,7 @@ import {Button, StyleSheet, TextInput} from 'react-native';
 import {Text, View} from '../components/Themed';
 import {ScrollView} from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Styles from '../components/Styles';
 
 export type Task = {
   title: string
@@ -12,7 +13,7 @@ export type Task = {
 
 export default function TodoListScreen() {
   return (
-    <View style={styles.container}>
+    <View style={Styles.container}>
       <Todo/>
     </View>
   );
@@ -20,10 +21,10 @@ export default function TodoListScreen() {
 
 function Task(props: { task: Task, index: number, onCompleted: (index: number) => void, onDeleted: (index: number) => void }) {
   return (
-    <View style={styles.row}>
+    <View style={Styles.row}>
       <Text>💡</Text>
-      <Text numberOfLines={1} style={[{textDecorationLine: props.task.completed ? "line-through" : "none",}, styles.text]}>{props.task.title}</Text>
-      <View style={styles.btnDoneRemove}>
+      <Text numberOfLines={1} style={[{textDecorationLine: props.task.completed ? "line-through" : "none",}, Styles.text]}>{props.task.title}</Text>
+      <View style={Styles.btnDoneRemove}>
         <Button onPress={() => (props.onCompleted(props.index))} title={props.task.completed ? "Undone" : "Done"}/>
         <Button onPress={() => (props.onDeleted(props.index))} title="Remove"/>
       </View>
@@ -72,8 +73,8 @@ function Todo() {
   }
 
   return (
-    <View style={styles.listContainer}>
-      <ScrollView style={styles.list}>
+    <View style={Styles.listContainer}>
+      <ScrollView style={Styles.list}>
         {tasks.map((task, index) => (
           <Task
             onDeleted={removeTask}
@@ -101,7 +102,7 @@ function CreateTask(props: { addTask: (value: string) => void }) {
   }
 
   return (
-    <View style={styles.btnAdd}>
+    <View style={Styles.btnAdd}>
       <TextInput
         style={{backgroundColor: '#ffffff', padding: 10, color: '#000000'}}
         value={value}
@@ -112,47 +113,3 @@ function CreateTask(props: { addTask: (value: string) => void }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    padding: 10,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-  row: {
-    display: 'flex',
-    flexDirection: 'row',
-    paddingBottom: 10,
-  },
-  list: {
-    overflowY: scroll,
-    maxHeight: 300,
-    flex: 1,
-    padding: 15,
-  },
-  text: {
-    padding: 5
-  },
-  listContainer: {
-    width: '90%'
-  },
-  btnAdd:{
-    justifyContent: 'center',
-    alignContent: 'center',
-  },
-  btnDoneRemove: {
-    flexDirection: 'row',
-    columnGap: 10,
-    alignItems: 'flex-end',
-    marginLeft: 'auto'
-  }
-});
