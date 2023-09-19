@@ -4,7 +4,7 @@ import {Button, StyleSheet, TextInput} from 'react-native';
 import {Text, View} from '../components/Themed';
 import {ScrollView} from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Styles from '../components/Styles';
+import Styles from '../constants/Styles';
 
 export type Task = {
   title: string
@@ -66,7 +66,7 @@ function Todo() {
   }
 
   //seta o json para salvar as tarefas com asyncstorage
-  const saveTaskJson = async (json: {title: string, completed: boolean}[]) => {
+  const saveTaskJson = async (json: Task[]) => {
     setTasks(json)
     const jsonString = JSON.stringify(json)
     await AsyncStorage.setItem('tasks', jsonString)
